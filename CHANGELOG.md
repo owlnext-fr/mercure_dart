@@ -24,5 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Zero runtime dependencies** — pure Dart SDK only.
 - **CI**: GitHub Actions workflow (analyze, unit tests on SDK 3.0.0 + stable, integration tests with Mercure Docker).
 - Integration test infrastructure with Docker (`dunglas/mercure`) and minimal JWT HS256 generator.
+- Library entry point: `import 'package:mercure_dart/mercure_dart.dart';`
 
 [1.0.0]: https://github.com/owlnext/mercure_dart/releases/tag/v1.0.0

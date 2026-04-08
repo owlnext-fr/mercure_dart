@@ -38,7 +38,7 @@ dart pub get
 ## Quick Start
 
 ```dart
-import 'package:mercure_dart/mercure.dart';
+import 'package:mercure_dart/mercure_dart.dart';
 
 void main() async {
   final hubUrl = Uri.parse('https://hub.example.com/.well-known/mercure');

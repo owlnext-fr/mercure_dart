@@ -1,0 +1,9 @@
+# Internal specs (not user-facing documentation)
+docs/
+
+# CI and editor config
+.github/
+.vscode/
+
+# Claude Code config
+CLAUDE.md

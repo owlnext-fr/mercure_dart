@@ -10,7 +10,7 @@
 /// ```
 library;
 
-import 'package:mercure_dart/mercure.dart';
+import 'package:mercure_dart/mercure_dart.dart';
 
 void main() async {
   final hubUrl = Uri.parse('http://localhost:8080/.well-known/mercure');

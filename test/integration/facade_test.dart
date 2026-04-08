@@ -3,7 +3,7 @@ library;
 
 import 'dart:async';
 
-import 'package:mercure_dart/mercure.dart';
+import 'package:mercure_dart/mercure_dart.dart';
 import 'package:mercure_dart/src/transport/mercure_transport_io.dart';
 import 'package:test/test.dart';
 
