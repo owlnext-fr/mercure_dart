@@ -9,6 +9,7 @@ This policy covers the **mercure_dart** Dart package — the client library for 
 | Version | Supported |
 |---------|-----------|
 | 1.0.x   | Yes       |
+| < 1.0   | No        |
 
 ## Reporting a Vulnerability
 
@@ -16,7 +17,7 @@ This policy covers the **mercure_dart** Dart package — the client library for 
 
 Instead, please report them privately:
 
-1. **GitHub Security Advisories** (preferred) — go to [Security Advisories](https://github.com/owlnext/mercure_dart/security/advisories) and click "Report a vulnerability".
+1. **GitHub Security Advisories** (preferred) — go to [Security Advisories](https://github.com/owlnext-fr/mercure_dart/security/advisories) and click "Report a vulnerability".
 2. **Email** — contact the maintainers at the email listed in the repository owner's GitHub profile.
 
 Include:

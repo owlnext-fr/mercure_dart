@@ -41,18 +41,18 @@ Everything else (`models/`, `sse/`, `auth/`, `discovery/`, `subscriptions_api/`)
 ### Layer Diagram
 
 ```
-┌─────────────────────────────────────────┐
-│  Public API: MercureSubscriber,         │
-│  MercurePublisher, MercureDiscovery,    │
-│  MercureSubscriptionsApi                │  ← Façades
-├─────────────────────────────────────────┤
-│  MercureTransport (abstract interface)  │  ← Platform boundary
-├──────────────┬──────────────────────────┤
-│  IO transport│  Web transport           │  ← Platform-specific
-│  (HttpClient)│  (EventSource + fetch)   │
-├──────────────┴──────────────────────────┤
-│  SSE parser, models, auth               │  ← Pure Dart, shared
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  Public API: MercureSubscriber,              │
+│  MercurePublisher, discoverMercureHub,       │
+│  MercureSubscriptionsApi                     │ ← Façades
+├──────────────────────────────────────────────┤
+│  MercureTransport (abstract interface)       │ ← Platform boundary
+├──────────────────────┬───────────────────────┤
+│  IO transport        │  Web transport        │ ← Platform-specific
+│  (HttpClient)        │  (EventSource + XHR)  │
+├──────────────────────┴───────────────────────┤
+│  SSE parser, models, auth                    │ ← Pure Dart, shared
+└──────────────────────────────────────────────┘
 ```
 
 ### SSE Pipeline (io transport only)

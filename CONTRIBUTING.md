@@ -10,7 +10,7 @@ Thanks for your interest in contributing! This document covers the setup, conven
 ## Setup
 
 ```bash
-git clone https://github.com/owlnext/mercure_dart.git
+git clone https://github.com/owlnext-fr/mercure_dart.git
 cd mercure_dart
 dart pub get
 ```
@@ -93,7 +93,7 @@ Keep PRs focused — one feature or fix per PR. Large refactors should be discus
 
 ## Reporting Bugs
 
-Open an [issue](https://github.com/owlnext/mercure_dart/issues) with:
+Open an [issue](https://github.com/owlnext-fr/mercure_dart/issues) with:
 
 - Dart SDK version (`dart --version`)
 - Platform (io/web, OS)

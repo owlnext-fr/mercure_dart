@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-04-08
+
+### Fixed
+
+- Repository URL corrected to `owlnext-fr` across all files (pubspec, README, CONTRIBUTING, SECURITY, CHANGELOG).
+- CI badge now targets `main` branch explicitly for accurate status display.
+- Architecture diagram alignment fixed (consistent column widths with box-drawing characters).
+
+### Added
+
+- Table of contents in README.
+- Emoji icons on features list.
+
 ## [1.0.0] - 2026-04-08
 
 ### Added
@@ -26,4 +39,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration test infrastructure with Docker (`dunglas/mercure`) and minimal JWT HS256 generator.
 - Library entry point: `import 'package:mercure_dart/mercure_dart.dart';`
 
-[1.0.0]: https://github.com/owlnext/mercure_dart/releases/tag/v1.0.0
+[1.0.1]: https://github.com/owlnext-fr/mercure_dart/releases/tag/v1.0.1
+[1.0.0]: https://github.com/owlnext-fr/mercure_dart/releases/tag/v1.0.0

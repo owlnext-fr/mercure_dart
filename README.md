@@ -2,23 +2,38 @@
 
 Pure Dart implementation of the [Mercure protocol](https://mercure.rocks) — zero dependencies, fully spec-compliant, multi-platform.
 
-[![CI](https://github.com/owlnext/mercure_dart/actions/workflows/ci.yml/badge.svg)](https://github.com/owlnext/mercure_dart/actions/workflows/ci.yml)
+[![CI](https://github.com/owlnext-fr/mercure_dart/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/owlnext-fr/mercure_dart/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Dart 3.0+](https://img.shields.io/badge/Dart-3.0+-0175C2.svg)](https://dart.dev)
 
 [Mercure](https://mercure.rocks) is a protocol for pushing data updates to web browsers and other HTTP clients using Server-Sent Events (SSE). This package implements the full Mercure client specification from scratch, with no external dependencies.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Reconnection](#reconnection)
+- [Supported Platforms](#supported-platforms)
+- [Architecture](#architecture)
+- [Tests](#tests)
+- [Contributing](#contributing)
+- [Security](#security)
+- [Protocol Reference](#protocol-reference)
+- [License](#license)
+
 ## Features
 
-- **Subscribe** to real-time updates via Server-Sent Events
-- **Publish** updates to a Mercure hub
-- **Discovery** of hub URLs from HTTP `Link` headers
-- **Subscriptions API** to query active subscriptions on the hub
-- **Multi-platform** — mobile (iOS/Android), desktop, server (dart:io) and web (dart:html)
-- **Zero runtime dependencies** — only uses the Dart SDK
-- **Automatic reconnection** with exponential backoff and `Last-Event-ID`
-- **Three auth methods** — Bearer token, cookie, query parameter
-- **Spec-compliant** SSE parser handling all edge cases
+- 📡 **Subscribe** to real-time updates via Server-Sent Events
+- 📤 **Publish** updates to a Mercure hub
+- 🔍 **Discovery** of hub URLs from HTTP `Link` headers
+- 📋 **Subscriptions API** to query active subscriptions on the hub
+- 🌍 **Multi-platform** — mobile (iOS/Android), desktop, server (dart:io) and web (dart:html)
+- 📦 **Zero runtime dependencies** — only uses the Dart SDK
+- 🔄 **Automatic reconnection** with exponential backoff and `Last-Event-ID`
+- 🔐 **Three auth methods** — Bearer token, cookie, query parameter
+- ✅ **Spec-compliant** SSE parser handling all edge cases
 
 ## Installation
 
@@ -228,18 +243,18 @@ On web, the browser's native `EventSource` handles reconnection internally.
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│  Public API: MercureSubscriber,         │
-│  MercurePublisher, discoverMercureHub,  │
-│  MercureSubscriptionsApi                │  ← Façades
-├─────────────────────────────────────────┤
-│  MercureTransport (abstract interface)  │  ← Platform boundary
-├──────────────┬──────────────────────────┤
-│  IO transport│  Web transport           │  ← Platform-specific
-│  (HttpClient)│  (EventSource + XHR)     │
-├──────────────┴──────────────────────────┤
-│  SSE parser, models, auth               │  ← Pure Dart, shared
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│  Public API: MercureSubscriber,              │
+│  MercurePublisher, discoverMercureHub,       │
+│  MercureSubscriptionsApi                     │ ← Façades
+├──────────────────────────────────────────────┤
+│  MercureTransport (abstract interface)       │ ← Platform boundary
+├──────────────────────┬───────────────────────┤
+│  IO transport        │  Web transport        │ ← Platform-specific
+│  (HttpClient)        │  (EventSource + XHR)  │
+├──────────────────────┴───────────────────────┤
+│  SSE parser, models, auth                    │ ← Pure Dart, shared
+└──────────────────────────────────────────────┘
 ```
 
 A single [conditional import](lib/src/transport/mercure_transport_factory.dart) selects the correct transport at compile time. Everything outside the `transport/` directory is pure Dart — no `dart:io` or `dart:html` imports.
