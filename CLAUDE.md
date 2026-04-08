@@ -59,6 +59,8 @@ Everything else (`models/`, `sse/`, `auth/`, `discovery/`, `subscriptions_api/`)
 
 `HttpClient response bytes` → `SseLineDecoder` (bytes→lines, handles \r\n/\r/\n split across chunks) → `SseParser` (stateful lines→MercureEvent) → `Stream<MercureEvent>`
 
+Both `SseLineDecoder` and `SseParser` enforce configurable size limits (`maxLineLength` default 1 MB, `maxEventSize` default 10 MB) to prevent memory exhaustion from malicious streams. On overflow, a `StateError` is emitted and the current line/event is discarded; the transport reconnects via backoff.
+
 The web transport skips this entirely — the browser's native EventSource handles SSE parsing and reconnection.
 
 ### Auth Model

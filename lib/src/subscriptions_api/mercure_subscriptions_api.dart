@@ -61,8 +61,11 @@ final class MercureSubscriptionsApi {
     final response = await _transport.get(url, auth: auth);
 
     if (response.statusCode != 200) {
+      final truncated = response.body.length > 200
+          ? '${response.body.substring(0, 200)}...'
+          : response.body;
       throw StateError(
-        'Subscriptions API failed: ${response.statusCode} ${response.body}',
+        'Subscriptions API failed: ${response.statusCode} $truncated',
       );
     }
 
@@ -92,8 +95,11 @@ final class MercureSubscriptionsApi {
     final response = await _transport.get(url, auth: auth);
 
     if (response.statusCode != 200) {
+      final truncated = response.body.length > 200
+          ? '${response.body.substring(0, 200)}...'
+          : response.body;
       throw StateError(
-        'Subscriptions API failed: ${response.statusCode} ${response.body}',
+        'Subscriptions API failed: ${response.statusCode} $truncated',
       );
     }
 

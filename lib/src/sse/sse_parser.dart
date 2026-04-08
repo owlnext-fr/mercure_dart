@@ -12,10 +12,18 @@ import '../models/mercure_event.dart';
 /// - Unknown fields are ignored
 /// - An empty line dispatches the accumulated event
 ///
+/// Events whose accumulated `data:` fields exceed [maxEventSize] bytes
+/// are discarded and a [StateError] is added to the output stream.
+///
 /// Used only by the dart:io transport — the web transport receives
 /// already-parsed events from the browser's native EventSource.
 final class SseParser implements StreamTransformer<String, MercureEvent> {
-  const SseParser();
+  /// Maximum allowed event size in bytes (accumulated `data:` fields).
+  /// Events exceeding this limit are discarded and an error is emitted.
+  /// Defaults to 10 MB.
+  final int maxEventSize;
+
+  const SseParser({this.maxEventSize = 10 * 1024 * 1024});
 
   @override
   Stream<MercureEvent> bind(Stream<String> stream) {
@@ -24,6 +32,8 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
     final dataBuffer = StringBuffer();
     var hasData = false;
     int? retry;
+    var dataSize = 0;
+    var overflow = false;
 
     void reset() {
       id = null;
@@ -31,6 +41,8 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
       dataBuffer.clear();
       hasData = false;
       retry = null;
+      dataSize = 0;
+      overflow = false;
     }
 
     return stream
@@ -38,7 +50,7 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
       handleData: (line, sink) {
         // Empty line → dispatch event if we have data
         if (line.isEmpty) {
-          if (hasData) {
+          if (hasData && !overflow) {
             sink.add(MercureEvent(
               id: id,
               type: type,
@@ -49,6 +61,9 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
           reset();
           return;
         }
+
+        // Skip all lines while in overflow state (until next empty line)
+        if (overflow) return;
 
         // Comment line
         if (line.startsWith(':')) return;
@@ -74,6 +89,15 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
 
         switch (fieldName) {
           case 'data':
+            dataSize += fieldValue.length + (hasData ? 1 : 0);
+            if (dataSize > maxEventSize) {
+              overflow = true;
+              dataBuffer.clear();
+              sink.addError(
+                StateError('SSE event exceeded $maxEventSize bytes'),
+              );
+              return;
+            }
             if (hasData) dataBuffer.write('\n');
             dataBuffer.write(fieldValue);
             hasData = true;
@@ -97,7 +121,7 @@ final class SseParser implements StreamTransformer<String, MercureEvent> {
       },
       handleDone: (sink) {
         // If there's buffered data without a trailing empty line, emit it
-        if (hasData) {
+        if (hasData && !overflow) {
           sink.add(MercureEvent(
             id: id,
             type: type,

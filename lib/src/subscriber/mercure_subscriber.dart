@@ -37,7 +37,17 @@ final class MercureSubscriber {
     this.lastEventId,
     MercureTransport? transport,
   })  : _transport = transport ?? createMercureTransport(),
-        _ownsTransport = transport == null;
+        _ownsTransport = transport == null {
+    if (topics.isEmpty) {
+      throw ArgumentError.value(topics, 'topics', 'must not be empty');
+    }
+    for (final topic in topics) {
+      if (topic.isEmpty) {
+        throw ArgumentError.value(
+            topic, 'topics', 'must not contain empty strings');
+      }
+    }
+  }
 
   /// Opens an SSE connection and returns a stream of events.
   ///

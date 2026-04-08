@@ -37,6 +37,33 @@ void main() {
       expect(sub.payload, isNull);
     });
 
+    test('fromJson throws FormatException on wrong type', () {
+      final json = {
+        'id': 123, // should be String
+        'type': 'Subscription',
+        'topic': 'https://example.com/a',
+        'subscriber': 'urn:uuid:123',
+        'active': true,
+      };
+      expect(
+        () => SubscriptionInfo.fromJson(json),
+        throwsFormatException,
+      );
+    });
+
+    test('fromJson throws FormatException on missing key', () {
+      final json = <String, dynamic>{
+        'type': 'Subscription',
+        'topic': 'https://example.com/a',
+        'subscriber': 'urn:uuid:123',
+        'active': true,
+      };
+      expect(
+        () => SubscriptionInfo.fromJson(json),
+        throwsFormatException,
+      );
+    });
+
     test('equality is based on identity fields', () {
       const a = SubscriptionInfo(
         id: '/sub/1',
@@ -93,6 +120,20 @@ void main() {
       expect(response.subscriptions, hasLength(2));
       expect(response.subscriptions[0].topic, 'https://example.com/{selector}');
       expect(response.subscriptions[1].payload, isNull);
+    });
+
+    test('fromJson throws FormatException on malformed subscriptions', () {
+      final json = {
+        '@context': 'https://mercure.rocks/',
+        'id': '/subs',
+        'type': 'Subscriptions',
+        'lastEventID': 'urn:uuid:abc',
+        'subscriptions': 'not-a-list',
+      };
+      expect(
+        () => SubscriptionsResponse.fromJson(json),
+        throwsFormatException,
+      );
     });
 
     test('fromJsonString parses a JSON string', () {

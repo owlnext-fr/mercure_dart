@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-04-08
+
+### Security
+
+- **SSE pipeline hardening** — configurable size limits to prevent memory exhaustion from malicious SSE streams:
+  - `SseLineDecoder`: `maxLineLength` parameter (default 1 MB). Lines exceeding the limit are discarded with a `StateError`.
+  - `SseParser`: `maxEventSize` parameter (default 10 MB). Events exceeding the limit are discarded with a `StateError`.
+- **Error message sanitization** — HTTP response bodies are truncated to 200 characters in exception messages to prevent information leakage (IO transport, web transport, subscriptions API).
+- **`MercureEvent.toString()` truncation** — event data is truncated to 100 characters in debug output to prevent sensitive payloads from leaking into logs.
+
+### Added
+
+- Input validation on `MercureSubscriber` and `PublishOptions` constructors: `topics` must be non-empty and contain no empty strings.
+- Defensive JSON deserialization in `SubscriptionInfo.fromJson` and `SubscriptionsResponse.fromJson`: `TypeError` is caught and rethrown as `FormatException` with context.
+
+### Changed
+
+- `PublishOptions` constructor is no longer `const` (body validation requires runtime checks).
+
 ## [1.0.1] - 2026-04-08
 
 ### Fixed
@@ -39,5 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration test infrastructure with Docker (`dunglas/mercure`) and minimal JWT HS256 generator.
 - Library entry point: `import 'package:mercure_dart/mercure_dart.dart';`
 
+[1.0.2]: https://github.com/owlnext-fr/mercure_dart/releases/tag/v1.0.2
 [1.0.1]: https://github.com/owlnext-fr/mercure_dart/releases/tag/v1.0.1
 [1.0.0]: https://github.com/owlnext-fr/mercure_dart/releases/tag/v1.0.0

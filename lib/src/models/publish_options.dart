@@ -27,14 +27,24 @@ final class PublishOptions {
   /// Reconnection delay hint in milliseconds (SSE `retry:` field).
   final int? retry;
 
-  const PublishOptions({
+  PublishOptions({
     required this.topics,
     this.data,
     this.private = false,
     this.id,
     this.type,
     this.retry,
-  });
+  }) {
+    if (topics.isEmpty) {
+      throw ArgumentError.value(topics, 'topics', 'must not be empty');
+    }
+    for (final topic in topics) {
+      if (topic.isEmpty) {
+        throw ArgumentError.value(
+            topic, 'topics', 'must not contain empty strings');
+      }
+    }
+  }
 
   /// Encodes these options as form-urlencoded fields.
   ///

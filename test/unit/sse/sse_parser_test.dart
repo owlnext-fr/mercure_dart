@@ -243,4 +243,106 @@ void main() {
       expect(events[0].type, '');
     });
   });
+
+  group('SseParser maxEventSize', () {
+    /// Helper with a custom maxEventSize.
+    Future<({List<MercureEvent> events, List<Object> errors})> parseWithLimit(
+      List<String> lines, {
+      required int maxEventSize,
+    }) async {
+      final controller = StreamController<String>();
+      final events = <MercureEvent>[];
+      final errors = <Object>[];
+      final completer = Completer<void>();
+      SseParser(maxEventSize: maxEventSize).bind(controller.stream).listen(
+            events.add,
+            onError: errors.add,
+            onDone: completer.complete,
+          );
+      for (final line in lines) {
+        controller.add(line);
+      }
+      await controller.close();
+      await completer.future;
+      return (events: events, errors: errors);
+    }
+
+    test('event within limit is emitted normally', () async {
+      final r = await parseWithLimit(
+        ['data: hello', ''],
+        maxEventSize: 100,
+      );
+      expect(r.events, hasLength(1));
+      expect(r.events[0].data, 'hello');
+      expect(r.errors, isEmpty);
+    });
+
+    test('event exceeding limit emits error and is discarded', () async {
+      final r = await parseWithLimit(
+        ['data: this-is-too-long', ''],
+        maxEventSize: 5,
+      );
+      expect(r.events, isEmpty);
+      expect(r.errors, hasLength(1));
+      expect(r.errors[0], isA<StateError>());
+    });
+
+    test('multi-data event exceeding limit emits error', () async {
+      final r = await parseWithLimit(
+        ['data: abc', 'data: def', ''],
+        maxEventSize: 5,
+      );
+      // "abc" (3) + \n (1) + "def" (3) = 7 > 5
+      expect(r.events, isEmpty);
+      expect(r.errors, hasLength(1));
+    });
+
+    test('overflow event does not corrupt next event', () async {
+      final r = await parseWithLimit(
+        ['data: overflow-data', '', 'data: ok', ''],
+        maxEventSize: 5,
+      );
+      expect(r.events, hasLength(1));
+      expect(r.events[0].data, 'ok');
+      expect(r.errors, hasLength(1));
+    });
+
+    test('overflow skips remaining fields until empty line', () async {
+      final r = await parseWithLimit(
+        [
+          'data: overflow-data',
+          'id: should-be-ignored',
+          'data: more-data',
+          '',
+          'id: valid-id',
+          'data: ok',
+          '',
+        ],
+        maxEventSize: 5,
+      );
+      expect(r.events, hasLength(1));
+      expect(r.events[0].data, 'ok');
+      expect(r.events[0].id, 'valid-id');
+      expect(r.errors, hasLength(1));
+    });
+
+    test('event exactly at limit is emitted', () async {
+      final r = await parseWithLimit(
+        ['data: abcde', ''],
+        maxEventSize: 5,
+      );
+      expect(r.events, hasLength(1));
+      expect(r.events[0].data, 'abcde');
+      expect(r.errors, isEmpty);
+    });
+
+    test('overflow event not emitted on stream close', () async {
+      final r = await parseWithLimit(
+        ['data: overflow-data'],
+        maxEventSize: 5,
+      );
+      expect(r.events, isEmpty);
+      expect(r.errors, hasLength(1));
+    });
+  });
 }

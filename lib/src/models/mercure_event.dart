@@ -38,6 +38,10 @@ final class MercureEvent {
   int get hashCode => Object.hash(id, type, data, retry);
 
   @override
-  String toString() =>
-      'MercureEvent(id: $id, type: $type, data: $data, retry: $retry)';
+  String toString() {
+    final truncatedData =
+        data.length > 100 ? '${data.substring(0, 100)}...' : data;
+    return 'MercureEvent(id: $id, type: $type, data: $truncatedData, '
+        'retry: $retry)';
+  }
 }

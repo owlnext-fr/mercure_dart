@@ -34,6 +34,7 @@ Pure Dart implementation of the [Mercure protocol](https://mercure.rocks) — ze
 - 🔄 **Automatic reconnection** with exponential backoff and `Last-Event-ID`
 - 🔐 **Three auth methods** — Bearer token, cookie, query parameter
 - ✅ **Spec-compliant** SSE parser handling all edge cases
+- 🛡️ **Hardened** SSE pipeline with configurable size limits against memory exhaustion
 
 ## Installation
 
@@ -218,6 +219,7 @@ The dart:io transport handles reconnection automatically:
 - **`retry:` hint** — when the hub sends a `retry:` field, it updates the base reconnection delay
 - **Reset on success** — the backoff counter resets after a successful connection
 - **Auth errors** — 401/403 responses stop reconnection (no point retrying with bad credentials)
+- **Stream size limits** — configurable `maxLineLength` (1 MB) and `maxEventSize` (10 MB) protect against memory exhaustion from malicious streams
 
 To request the full event history on first connection:
 

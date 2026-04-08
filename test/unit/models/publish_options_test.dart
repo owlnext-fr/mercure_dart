@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('PublishOptions', () {
     test('constructs with required topics only', () {
-      const opts = PublishOptions(topics: ['https://example.com/foo']);
+      final opts = PublishOptions(topics: ['https://example.com/foo']);
       expect(opts.topics, ['https://example.com/foo']);
       expect(opts.data, isNull);
       expect(opts.private, isFalse);
@@ -15,7 +15,7 @@ void main() {
 
     group('toFormFields', () {
       test('single topic with data', () {
-        const opts = PublishOptions(
+        final opts = PublishOptions(
           topics: ['https://example.com/foo'],
           data: 'the content',
         );
@@ -28,7 +28,7 @@ void main() {
       });
 
       test('multiple topics produce repeated topic fields', () {
-        const opts = PublishOptions(
+        final opts = PublishOptions(
           topics: [
             'https://example.com/foo',
             'https://example.com/bar',
@@ -44,7 +44,7 @@ void main() {
       });
 
       test('private=on when private is true', () {
-        const opts = PublishOptions(
+        final opts = PublishOptions(
           topics: ['t'],
           private: true,
         );
@@ -54,7 +54,7 @@ void main() {
       });
 
       test('private field absent when false', () {
-        const opts = PublishOptions(topics: ['t']);
+        final opts = PublishOptions(topics: ['t']);
         final fields = opts.toFormFields();
         expect(
           fields.where((e) => e.key == 'private'),
@@ -63,7 +63,7 @@ void main() {
       });
 
       test('all optional fields', () {
-        const opts = PublishOptions(
+        final opts = PublishOptions(
           topics: ['t'],
           data: 'd',
           private: true,
@@ -81,9 +81,32 @@ void main() {
       });
 
       test('null data is omitted', () {
-        const opts = PublishOptions(topics: ['t']);
+        final opts = PublishOptions(topics: ['t']);
         final fields = opts.toFormFields();
         expect(fields.where((e) => e.key == 'data'), isEmpty);
+      });
+    });
+
+    group('topic validation', () {
+      test('throws on empty topics list', () {
+        expect(
+          () => PublishOptions(topics: []),
+          throwsArgumentError,
+        );
+      });
+
+      test('throws on empty topic string', () {
+        expect(
+          () => PublishOptions(topics: ['']),
+          throwsArgumentError,
+        );
+      });
+
+      test('throws when one topic is empty among valid ones', () {
+        expect(
+          () => PublishOptions(topics: ['https://example.com/ok', '']),
+          throwsArgumentError,
+        );
       });
     });
   });

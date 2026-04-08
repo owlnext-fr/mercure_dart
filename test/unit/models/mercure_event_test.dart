@@ -50,5 +50,13 @@ void main() {
       expect(s, contains('data: d'));
       expect(s, contains('retry: 100'));
     });
+
+    test('toString truncates long data', () {
+      final longData = 'x' * 200;
+      final event = MercureEvent(data: longData);
+      final s = event.toString();
+      expect(s, contains('${'x' * 100}...'));
+      expect(s, isNot(contains('x' * 101)));
+    });
   });
 }

@@ -45,15 +45,22 @@ final class SubscriptionInfo {
 
   /// Parses a [SubscriptionInfo] from a JSON-LD map.
   factory SubscriptionInfo.fromJson(Map<String, dynamic> json) {
-    return SubscriptionInfo(
-      id: json['id'] as String,
-      type: json['type'] as String,
-      topic: json['topic'] as String,
-      subscriber: json['subscriber'] as String,
-      active: json['active'] as bool,
-      payload: json['payload'] as Map<String, dynamic>?,
-      lastEventId: json['lastEventID'] as String?,
-    );
+    try {
+      return SubscriptionInfo(
+        id: json['id'] as String,
+        type: json['type'] as String,
+        topic: json['topic'] as String,
+        subscriber: json['subscriber'] as String,
+        active: json['active'] as bool,
+        payload: json['payload'] as Map<String, dynamic>?,
+        lastEventId: json['lastEventID'] as String?,
+      );
+    } on TypeError catch (e) {
+      throw FormatException(
+        'Invalid subscription JSON: $e',
+        json.toString(),
+      );
+    }
   }
 
   @override
@@ -111,17 +118,24 @@ final class SubscriptionsResponse {
 
   /// Parses a [SubscriptionsResponse] from a JSON-LD map.
   factory SubscriptionsResponse.fromJson(Map<String, dynamic> json) {
-    final subs = (json['subscriptions'] as List<dynamic>)
-        .cast<Map<String, dynamic>>()
-        .map(SubscriptionInfo.fromJson)
-        .toList(growable: false);
+    try {
+      final subs = (json['subscriptions'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(SubscriptionInfo.fromJson)
+          .toList(growable: false);
 
-    return SubscriptionsResponse(
-      context: json['@context'] as String,
-      id: json['id'] as String,
-      type: json['type'] as String,
-      lastEventId: json['lastEventID'] as String,
-      subscriptions: subs,
-    );
+      return SubscriptionsResponse(
+        context: json['@context'] as String,
+        id: json['id'] as String,
+        type: json['type'] as String,
+        lastEventId: json['lastEventID'] as String,
+        subscriptions: subs,
+      );
+    } on TypeError catch (e) {
+      throw FormatException(
+        'Invalid subscriptions response JSON: $e',
+        json.toString(),
+      );
+    }
   }
 }

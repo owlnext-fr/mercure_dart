@@ -61,9 +61,11 @@ final class MercureTransportIo extends MercureTransport {
           if (response.statusCode != 200) {
             final body =
                 await response.transform(const SystemEncoding().decoder).join();
+            final truncated =
+                body.length > 200 ? '${body.substring(0, 200)}...' : body;
             controller.addError(
               HttpException(
-                'Subscription failed: ${response.statusCode} $body',
+                'Subscription failed: ${response.statusCode} $truncated',
                 uri: url,
               ),
             );
@@ -152,8 +154,11 @@ final class MercureTransportIo extends MercureTransport {
         await response.transform(const SystemEncoding().decoder).join();
 
     if (response.statusCode != 200) {
+      final truncated = responseBody.length > 200
+          ? '${responseBody.substring(0, 200)}...'
+          : responseBody;
       throw HttpException(
-        'Publish failed: ${response.statusCode} $responseBody',
+        'Publish failed: ${response.statusCode} $truncated',
         uri: hubUrl,
       );
     }

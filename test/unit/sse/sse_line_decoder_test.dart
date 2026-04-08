@@ -110,4 +110,79 @@ void main() {
       expect(result, ['hello', 'w']);
     });
   });
+
+  group('SseLineDecoder maxLineLength', () {
+    /// Helper with a custom maxLineLength.
+    Future<({List<String> lines, List<Object> errors})> decodeWithLimit(
+      List<List<int>> chunks, {
+      required int maxLineLength,
+    }) async {
+      final controller = StreamController<List<int>>();
+      final lines = <String>[];
+      final errors = <Object>[];
+      final completer = Completer<void>();
+      SseLineDecoder(maxLineLength: maxLineLength)
+          .bind(controller.stream)
+          .listen(
+            lines.add,
+            onError: errors.add,
+            onDone: completer.complete,
+          );
+      for (final chunk in chunks) {
+        controller.add(chunk);
+      }
+      await controller.close();
+      await completer.future;
+      return (lines: lines, errors: errors);
+    }
+
+    test('line within limit is emitted normally', () async {
+      final r = await decodeWithLimit([bytes('hello\n')], maxLineLength: 10);
+      expect(r.lines, ['hello']);
+      expect(r.errors, isEmpty);
+    });
+
+    test('line exceeding limit emits error and is discarded', () async {
+      final r = await decodeWithLimit(
+        [bytes('this-is-too-long\nok\n')],
+        maxLineLength: 5,
+      );
+      expect(r.lines, ['ok']);
+      expect(r.errors, hasLength(1));
+      expect(r.errors[0], isA<StateError>());
+    });
+
+    test('line exactly at limit is emitted normally', () async {
+      final r = await decodeWithLimit([bytes('abcde\n')], maxLineLength: 5);
+      expect(r.lines, ['abcde']);
+      expect(r.errors, isEmpty);
+    });
+
+    test('overflow line split across chunks is discarded', () async {
+      final r = await decodeWithLimit(
+        [bytes('abc'), bytes('defgh\nnext\n')],
+        maxLineLength: 5,
+      );
+      expect(r.lines, ['next']);
+      expect(r.errors, hasLength(1));
+    });
+
+    test('multiple overflow lines emit multiple errors', () async {
+      final r = await decodeWithLimit(
+        [bytes('toolong1\ntoolong2\nok\n')],
+        maxLineLength: 3,
+      );
+      expect(r.lines, ['ok']);
+      expect(r.errors, hasLength(2));
+    });
+
+    test('overflow does not corrupt subsequent lines', () async {
+      final r = await decodeWithLimit(
+        [bytes('overflow-data\na\nb\n')],
+        maxLineLength: 5,
+      );
+      expect(r.lines, ['a', 'b']);
+      expect(r.errors, hasLength(1));
+    });
+  });
 }

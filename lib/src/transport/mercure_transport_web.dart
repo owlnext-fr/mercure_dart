@@ -96,8 +96,11 @@ final class MercureTransportWeb extends MercureTransport {
     );
 
     if (response.status != 200) {
+      final body = response.responseText ?? '';
+      final truncated =
+          body.length > 200 ? '${body.substring(0, 200)}...' : body;
       throw StateError(
-        'Publish failed: ${response.status} ${response.responseText}',
+        'Publish failed: ${response.status} $truncated',
       );
     }
 

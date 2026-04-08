@@ -31,6 +31,22 @@ We will acknowledge receipt within **48 hours** and aim to provide a fix or miti
 
 ## Known Security Considerations
 
+### SSE stream size limits (v1.0.2+)
+
+The SSE parser enforces configurable size limits to prevent memory exhaustion from malicious or misbehaving hubs:
+
+- **Line length**: `SseLineDecoder(maxLineLength: 1024 * 1024)` — default 1 MB per line
+- **Event size**: `SseParser(maxEventSize: 10 * 1024 * 1024)` — default 10 MB per event
+
+When a limit is exceeded, the current line/event is discarded and a `StateError` is emitted. The IO transport catches this error and reconnects via exponential backoff with `Last-Event-ID`, so no events are permanently lost.
+
+To adjust limits for custom transports:
+
+```dart
+SseLineDecoder(maxLineLength: 5 * 1024 * 1024)  // 5 MB
+SseParser(maxEventSize: 50 * 1024 * 1024)        // 50 MB
+```
+
 ### Query parameter authentication
 
 The Mercure protocol allows passing JWT tokens as a URL query parameter (`?authorization=<token>`). This is used as a fallback on web platforms where `EventSource` does not support custom headers.

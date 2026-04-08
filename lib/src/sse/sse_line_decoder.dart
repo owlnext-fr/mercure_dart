@@ -8,15 +8,23 @@ const _cr = 0x0D; // \r
 /// Handles all three SSE line delimiters: `\r\n`, `\r`, and `\n`,
 /// including delimiters split across chunk boundaries.
 ///
+/// Lines exceeding [maxLineLength] bytes are discarded and a
+/// [StateError] is added to the output stream.
+///
 /// Used only by the dart:io transport — the web transport relies on
 /// the browser's native EventSource which handles line splitting.
 final class SseLineDecoder implements StreamTransformer<List<int>, String> {
-  const SseLineDecoder();
+  /// Maximum allowed line length in bytes. Lines exceeding this limit
+  /// are discarded and an error is emitted. Defaults to 1 MB.
+  final int maxLineLength;
+
+  const SseLineDecoder({this.maxLineLength = 1024 * 1024});
 
   @override
   Stream<String> bind(Stream<List<int>> stream) {
     final buffer = <int>[];
     var lastCharWasCr = false;
+    var overflow = false;
 
     return stream.transform(StreamTransformer<List<int>, String>.fromHandlers(
       handleData: (chunk, sink) {
@@ -30,17 +38,34 @@ final class SseLineDecoder implements StreamTransformer<List<int>, String> {
               continue;
             }
             // Pure \n delimiter
-            sink.add(String.fromCharCodes(buffer));
+            if (overflow) {
+              overflow = false;
+            } else {
+              sink.add(String.fromCharCodes(buffer));
+            }
             buffer.clear();
             lastCharWasCr = false;
           } else if (byte == _cr) {
             // \r delimiter — emit line immediately
-            sink.add(String.fromCharCodes(buffer));
+            if (overflow) {
+              overflow = false;
+            } else {
+              sink.add(String.fromCharCodes(buffer));
+            }
             buffer.clear();
             lastCharWasCr = true;
           } else {
             lastCharWasCr = false;
-            buffer.add(byte);
+            if (!overflow) {
+              buffer.add(byte);
+              if (buffer.length > maxLineLength) {
+                sink.addError(
+                  StateError('SSE line exceeded $maxLineLength bytes'),
+                );
+                buffer.clear();
+                overflow = true;
+              }
+            }
           }
         }
       },
