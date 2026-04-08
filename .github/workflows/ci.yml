@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    name: Analyze & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.0.0'
+      - run: dart pub get
+      - run: dart analyze
+      - run: dart format --set-exit-if-changed .
+
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: ['3.0.0', 'stable']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - run: dart pub get
+      - run: dart test test/unit/
+
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test-unit
+    services:
+      mercure:
+        image: dunglas/mercure
+        env:
+          MERCURE_PUBLISHER_JWT_KEY: 'mercure-dart-test-secret-key-min-256-bits!!'
+          MERCURE_SUBSCRIBER_JWT_KEY: 'mercure-dart-test-secret-key-min-256-bits!!'
+          MERCURE_EXTRA_DIRECTIVES: |
+            anonymous
+            subscriptions
+          SERVER_NAME: ':80'
+        ports:
+          - 8080:80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart test test/integration/ --timeout 60s
+        env:
+          MERCURE_HUB_URL: 'http://localhost:8080/.well-known/mercure'
